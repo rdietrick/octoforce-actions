@@ -1,6 +1,7 @@
 {
   "name": "octoforce-actions",
   "private": true,
+  "type": "module",
   "version": "1.0.0",
   "description": "A lightweight open-source Salesforce CI/CD framework built on the GitHub platform.",
   "scripts": {
