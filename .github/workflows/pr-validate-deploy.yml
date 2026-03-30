@@ -1,0 +1,142 @@
+name: Manual Salesforce Validate Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr-number:
+        description: Pull request number to validate
+        required: true
+        type: string
+      target-org:
+        description: Target org for validation deployment
+        required: true
+        default: Template
+        type: choice
+        options:
+          - Template
+          - Production
+      run-tests-level:
+        description: Salesforce test level for validation deployment
+        required: true
+        default: RunLocalTests
+        type: choice
+        options:
+          - RunLocalTests
+          - NoTestRun
+          - RunSpecifiedTests
+          - RunAllTestsInOrg
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: pr-validate-deploy-${{ github.event.inputs['pr-number'] || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-deploy:
+    name: Salesforce Validate Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Authorize Workflow Actor
+        env:
+          ACTOR: ${{ github.actor }}
+          ORG: ${{ github.repository_owner }}
+          TEAM_SLUG: salesforce-team
+          TEAM_CHECK_TOKEN: ${{ secrets.BOT_USER_SCOPED_PAT }}
+        run: |
+          if [ -z "$TEAM_CHECK_TOKEN" ]; then
+            echo "::error::BOT_USER_SCOPED_PAT is not configured."
+            exit 1
+          fi
+
+          MEMBERSHIP_URL="https://api.github.com/orgs/${ORG}/teams/${TEAM_SLUG}/memberships/${ACTOR}"
+          HTTP_STATUS=$(curl -sS -o team-membership.json -w "%{http_code}" \
+            -H "Authorization: Bearer ${TEAM_CHECK_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "$MEMBERSHIP_URL")
+
+          if [ "$HTTP_STATUS" != "200" ]; then
+            rm -f team-membership.json
+            echo "::error::${ACTOR} is not authorized to run this workflow (team: ${ORG}/${TEAM_SLUG})."
+            exit 1
+          fi
+
+          MEMBERSHIP_STATE=$(python3 -c 'import json; print(json.load(open("team-membership.json")).get("state", ""))')
+          rm -f team-membership.json
+
+          if [ "$MEMBERSHIP_STATE" != "active" ]; then
+            echo "::error::${ACTOR} is not an active member of ${ORG}/${TEAM_SLUG}."
+            exit 1
+          fi
+
+          echo "${ACTOR} is an active member of ${ORG}/${TEAM_SLUG}; authorization granted."
+
+      - name: Resolve Target Ref
+        id: resolve_target
+        env:
+          PR_NUMBER: ${{ github.event.inputs['pr-number'] }}
+        run: |
+          if ! [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]; then
+            echo "pr-number must be numeric"
+            exit 1
+          fi
+
+          echo "checkout_ref=refs/pull/$PR_NUMBER/head" >> $GITHUB_OUTPUT
+          echo "target_name=pr-$PR_NUMBER" >> $GITHUB_OUTPUT
+
+      - name: Checkout
+        uses: actions/checkout@885641592076c27bfb56c028cd5612cdad63e16d
+        with:
+          fetch-depth: 1
+          ref: ${{ steps.resolve_target.outputs.checkout_ref }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Cache node modules
+        uses: actions/cache@v5
+        id: npm_cache_id
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-npm-cache-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-cache-
+            ${{ runner.os }}-
+
+      - name: Install Dependencies
+        if: steps.npm_cache_id.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Authenticate Production Org
+        if: inputs['target-org'] == 'Production'
+        env:
+          SALESFORCE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_JWT_SECRET_KEY }}
+        run: |
+          trap 'rm -f server.key' EXIT
+          echo "${SALESFORCE_JWT_SECRET_KEY}" > server.key
+          npx sfdx force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME }} -a Production --instanceurl https://login.salesforce.com
+
+      - name: Authenticate Template Org
+        if: inputs['target-org'] == 'Template'
+        env:
+          SALESFORCE_TEMPLATE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_TEMPLATE_JWT_SECRET_KEY }}
+        run: |
+          trap 'rm -f server.key' EXIT
+          echo "${SALESFORCE_TEMPLATE_JWT_SECRET_KEY}" > server.key
+          npx sfdx force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_TEMPLATE_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_TEMPLATE_USERNAME }} -a Template --instanceurl https://test.salesforce.com
+
+      - name: Run PR Validate Core
+        uses: ./.github/actions/pr-validate-core
+        with:
+          pr-number: ${{ inputs['pr-number'] }}
+          run-tests-level: ${{ inputs['run-tests-level'] }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          post-pr-comment: true
+          apply-validation-label: true
+        env:
+          TARGET_ORG_ALIAS: ${{ inputs['target-org'] }}
