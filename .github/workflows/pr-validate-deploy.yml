@@ -45,10 +45,10 @@ jobs:
           ACTOR: ${{ github.actor }}
           ORG: ${{ github.repository_owner }}
           TEAM_SLUG: salesforce-team
-          TEAM_CHECK_TOKEN: ${{ secrets.BOT_USER_SCOPED_PAT }}
+          TEAM_CHECK_TOKEN: ${{ secrets.SCOPED_PAT }}
         run: |
           if [ -z "$TEAM_CHECK_TOKEN" ]; then
-            echo "::error::BOT_USER_SCOPED_PAT is not configured."
+            echo "::error::SCOPED_PAT is not configured."
             exit 1
           fi
 
@@ -119,7 +119,7 @@ jobs:
         run: |
           trap 'rm -f server.key' EXIT
           echo "${SALESFORCE_JWT_SECRET_KEY}" > server.key
-          npx sfdx force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME }} -a Production --instanceurl https://login.salesforce.com
+          npx sfdx force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_CLIENT_ID }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME }} -a Production --instanceurl https://login.salesforce.com
 
       - name: Authenticate Template Org
         if: inputs['target-org'] == 'Template'
@@ -135,7 +135,7 @@ jobs:
         with:
           pr-number: ${{ inputs['pr-number'] }}
           run-tests-level: ${{ inputs['run-tests-level'] }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.SCOPED_PAT }}
           post-pr-comment: true
           apply-validation-label: true
         env:
