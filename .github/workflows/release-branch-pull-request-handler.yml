@@ -13,6 +13,25 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.event.pull_request.base.ref, vars.RELEASE_BRANCH_PREFIX)
     steps:
+      - name: Check Required Secrets and Variables
+        run: |
+          missing=()
+          [ -z "$SCOPED_PAT" ] && missing+=("secret: SCOPED_PAT")
+          [ -z "$SFDX_AUTH_SECRET_KEY" ] && missing+=("secret: SFDX_AUTH_SECRET_KEY")
+          [ -z "$RELEASE_BRANCH_PREFIX" ] && missing+=("variable: RELEASE_BRANCH_PREFIX")
+          [ -z "$ISSUE_BRANCH_PREFIX" ] && missing+=("variable: ISSUE_BRANCH_PREFIX")
+          [ -z "$DEPLOYMENT_TIMEOUT" ] && missing+=("variable: DEPLOYMENT_TIMEOUT")
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::error::Missing required configuration:"
+            for item in "${missing[@]}"; do echo "  - $item"; done
+            exit 1
+          fi
+        env:
+          SCOPED_PAT: ${{ secrets.SCOPED_PAT }}
+          SFDX_AUTH_SECRET_KEY: ${{ secrets.SFDX_AUTH_SECRET_KEY }}
+          RELEASE_BRANCH_PREFIX: ${{ vars.RELEASE_BRANCH_PREFIX }}
+          ISSUE_BRANCH_PREFIX: ${{ vars.ISSUE_BRANCH_PREFIX }}
+          DEPLOYMENT_TIMEOUT: ${{ vars.DEPLOYMENT_TIMEOUT }}
       - name: Checkout
         uses: actions/checkout@v2.5.0
         with:
