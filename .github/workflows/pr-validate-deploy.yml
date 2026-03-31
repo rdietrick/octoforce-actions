@@ -119,7 +119,7 @@ jobs:
         run: |
           trap 'rm -f server.key' EXIT
           echo "${SALESFORCE_JWT_KEY}" > server.key
-          npx sfdx force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_CLIENT_ID }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME }} -a Production --instanceurl https://login.salesforce.com
+          npx sfdx force:auth:jwt:grant --client-id ${{ secrets.SALESFORCE_CLIENT_ID }} --jwt-key-file server.key --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME }} -a Production --instance-url https://octoforce2.my.salesforce.com/
 
       - name: Authenticate Template Org
         if: inputs['target-org'] == 'Template'
@@ -128,7 +128,7 @@ jobs:
         run: |
           trap 'rm -f server.key' EXIT
           echo "${SALESFORCE_TEMPLATE_JWT_SECRET_KEY}" > server.key
-          npx sfdx force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_TEMPLATE_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_TEMPLATE_USERNAME }} -a Template --instanceurl https://test.salesforce.com
+          npx sfdx force:auth:jwt:grant --client-id ${{ secrets.SALESFORCE_TEMPLATE_CONSUMER_KEY }} --jwt-key-file server.key --username ${{ secrets.SALESFORCE_TEMPLATE_USERNAME }} -a Template --instance-url https://octoforce2--template.sandbox.my.salesforce.com/
 
       - name: Run PR Validate Core
         uses: ./.github/actions/pr-validate-core
