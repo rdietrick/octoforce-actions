@@ -50,7 +50,7 @@ jobs:
       - name: Install profile decompose sf plugin # ERROR: Unable to convert this command; you must convert it manually.
 
         if: steps.requires-deploy.outputs.changed == '1'
-        run: echo y | npx sf plugins install @rdietrick/sfdx-profile-decompose
+        run: echo y | npx sf plugins:install @rdietrick/sfdx-profile-decompose
 
       - name: Authenticate DevHub
         if: steps.requires-deploy.outputs.changed == '1'
