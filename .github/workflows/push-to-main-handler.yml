@@ -27,6 +27,19 @@ jobs:
         with:
           node-version-file: ".nvmrc"
 
+      - name: Cache Node Modules
+        uses: actions/cache@v5
+        id: npm_cache_id
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-npm-cache-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-cache-
+            ${{ runner.os }}-
+
+      - name: Install Dependencies
+        if: steps.npm_cache_id.outputs.cache-hit != 'true'
+        run: npm ci
       - name: Authorize external workspace
         run: |
           git config --global --add safe.directory /github/workspace
