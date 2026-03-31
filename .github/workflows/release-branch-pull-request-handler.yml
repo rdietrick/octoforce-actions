@@ -127,6 +127,7 @@ jobs:
           sudo apt install age
           echo "$SFDX_AUTH_SECRET_KEY" >> key.txt
           age --decrypt -i key.txt ${LOGIN_ENC_FILE}.age > ${LOGIN_ENC_FILE}
+          cat ${LOGIN_ENC_FILE}
           rm key.txt
           npx sf org login sfdx-url -f ${LOGIN_ENC_FILE} -a is${{ steps.branchFilter.outputs.issueNumber }}uat
       - name: Deploy Source to Sandbox
