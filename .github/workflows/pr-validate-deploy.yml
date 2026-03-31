@@ -115,7 +115,7 @@ jobs:
       - name: Authenticate Production Org
         if: inputs['target-org'] == 'Production'
         env:
-          SALESFORCE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_JWT_SECRET_KEY }}
+          SALESFORCE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_JWT_KEY }}
         run: |
           trap 'rm -f server.key' EXIT
           echo "${SALESFORCE_JWT_SECRET_KEY}" > server.key
