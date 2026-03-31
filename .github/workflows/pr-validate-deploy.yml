@@ -117,7 +117,7 @@ jobs:
         env:
           SALESFORCE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_JWT_KEY }}
         run: |
-          trap 'rm -f server.key' EXIT
+          #trap 'rm -f server.key' EXIT
           echo "${SALESFORCE_JWT_KEY}" > server.key
           npx sfdx force:auth:jwt:grant --client-id ${{ secrets.SALESFORCE_CLIENT_ID }} --jwt-key-file server.key --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME }} -a Production --instance-url https://octoforce2.my.salesforce.com/
 
@@ -126,7 +126,7 @@ jobs:
         env:
           SALESFORCE_TEMPLATE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_TEMPLATE_JWT_SECRET_KEY }}
         run: |
-          trap 'rm -f server.key' EXIT
+          #trap 'rm -f server.key' EXIT
           echo "${SALESFORCE_TEMPLATE_JWT_SECRET_KEY}" > server.key
           npx sfdx force:auth:jwt:grant --client-id ${{ secrets.SALESFORCE_TEMPLATE_CONSUMER_KEY }} --jwt-key-file server.key --username ${{ secrets.SALESFORCE_TEMPLATE_USERNAME }} -a Template --instance-url https://octoforce2--template.sandbox.my.salesforce.com/
 
