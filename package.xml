@@ -9,5 +9,9 @@
         <members>Admin</members>
         <name>Profile</name>
     </types>
+    <types>
+        <members>Do_Anything</members>
+        <name>PermissionSet</name>
+    </types>
     <version>66.0</version>
 </Package>

@@ -119,7 +119,7 @@ jobs:
         run: |
           #trap 'rm -f server.key' EXIT
           echo "${SALESFORCE_JWT_KEY}" > server.key
-          npx sfdx force:auth:jwt:grant --client-id ${{ secrets.SALESFORCE_CLIENT_ID }} --jwt-key-file server.key --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME }} -a Production --instance-url https://octoforce2.my.salesforce.com/
+          npx sfdx force:auth:jwt:grant --client-id ${{ secrets.SALESFORCE_CLIENT_ID }} --jwt-key-file server.key --username ${{ secrets.SALESFORCE_PROD_USERNAME }} -a Production --instance-url https://octoforce2.my.salesforce.com/
 
       - name: Authenticate Template Org
         if: inputs['target-org'] == 'Template'

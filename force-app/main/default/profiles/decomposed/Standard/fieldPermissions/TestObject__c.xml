@@ -4,4 +4,9 @@
         <field>TestObject__c.Bugs__c</field>
         <readable>true</readable>
     </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>TestObject__c.Status__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
 </Profile>
