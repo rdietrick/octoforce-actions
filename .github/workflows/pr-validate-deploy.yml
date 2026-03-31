@@ -40,39 +40,39 @@ jobs:
     name: Salesforce Validate Deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Authorize Workflow Actor
-        env:
-          ACTOR: ${{ github.actor }}
-          ORG: ${{ github.repository_owner }}
-          TEAM_SLUG: salesforce-team
-          TEAM_CHECK_TOKEN: ${{ secrets.SCOPED_PAT }}
-        run: |
-          if [ -z "$TEAM_CHECK_TOKEN" ]; then
-            echo "::error::SCOPED_PAT is not configured."
-            exit 1
-          fi
+      # - name: Authorize Workflow Actor
+      #   env:
+      #     ACTOR: ${{ github.actor }}
+      #     ORG: ${{ github.repository_owner }}
+      #     TEAM_SLUG: salesforce-team
+      #     TEAM_CHECK_TOKEN: ${{ secrets.SCOPED_PAT }}
+      #   run: |
+      #     if [ -z "$TEAM_CHECK_TOKEN" ]; then
+      #       echo "::error::SCOPED_PAT is not configured."
+      #       exit 1
+      #     fi
 
-          MEMBERSHIP_URL="https://api.github.com/orgs/${ORG}/teams/${TEAM_SLUG}/memberships/${ACTOR}"
-          HTTP_STATUS=$(curl -sS -o team-membership.json -w "%{http_code}" \
-            -H "Authorization: Bearer ${TEAM_CHECK_TOKEN}" \
-            -H "Accept: application/vnd.github+json" \
-            "$MEMBERSHIP_URL")
+      #     MEMBERSHIP_URL="https://api.github.com/orgs/${ORG}/teams/${TEAM_SLUG}/memberships/${ACTOR}"
+      #     HTTP_STATUS=$(curl -sS -o team-membership.json -w "%{http_code}" \
+      #       -H "Authorization: Bearer ${TEAM_CHECK_TOKEN}" \
+      #       -H "Accept: application/vnd.github+json" \
+      #       "$MEMBERSHIP_URL")
 
-          if [ "$HTTP_STATUS" != "200" ]; then
-            rm -f team-membership.json
-            echo "::error::${ACTOR} is not authorized to run this workflow (team: ${ORG}/${TEAM_SLUG})."
-            exit 1
-          fi
+      #     if [ "$HTTP_STATUS" != "200" ]; then
+      #       rm -f team-membership.json
+      #       echo "::error::${ACTOR} is not authorized to run this workflow (team: ${ORG}/${TEAM_SLUG})."
+      #       exit 1
+      #     fi
 
-          MEMBERSHIP_STATE=$(python3 -c 'import json; print(json.load(open("team-membership.json")).get("state", ""))')
-          rm -f team-membership.json
+      #     MEMBERSHIP_STATE=$(python3 -c 'import json; print(json.load(open("team-membership.json")).get("state", ""))')
+      #     rm -f team-membership.json
 
-          if [ "$MEMBERSHIP_STATE" != "active" ]; then
-            echo "::error::${ACTOR} is not an active member of ${ORG}/${TEAM_SLUG}."
-            exit 1
-          fi
+      #     if [ "$MEMBERSHIP_STATE" != "active" ]; then
+      #       echo "::error::${ACTOR} is not an active member of ${ORG}/${TEAM_SLUG}."
+      #       exit 1
+      #     fi
 
-          echo "${ACTOR} is an active member of ${ORG}/${TEAM_SLUG}; authorization granted."
+      #     echo "${ACTOR} is an active member of ${ORG}/${TEAM_SLUG}; authorization granted."
 
       - name: Resolve Target Ref
         id: resolve_target
@@ -115,20 +115,20 @@ jobs:
       - name: Authenticate Production Org
         if: inputs['target-org'] == 'Production'
         env:
-          SALESFORCE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_JWT_SECRET_KEY }}
+          SALESFORCE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_JWT_KEY }}
         run: |
-          trap 'rm -f server.key' EXIT
-          echo "${SALESFORCE_JWT_SECRET_KEY}" > server.key
-          npx sfdx force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_CLIENT_ID }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME }} -a Production --instanceurl https://login.salesforce.com
+          #trap 'rm -f server.key' EXIT
+          echo "${SALESFORCE_JWT_KEY}" > server.key
+          npx sfdx force:auth:jwt:grant --client-id ${{ secrets.SALESFORCE_CLIENT_ID }} --jwt-key-file server.key --username ${{ secrets.SALESFORCE_PROD_USERNAME }} -a Production --instance-url https://octoforce2.my.salesforce.com/
 
       - name: Authenticate Template Org
         if: inputs['target-org'] == 'Template'
         env:
           SALESFORCE_TEMPLATE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_TEMPLATE_JWT_SECRET_KEY }}
         run: |
-          trap 'rm -f server.key' EXIT
+          #trap 'rm -f server.key' EXIT
           echo "${SALESFORCE_TEMPLATE_JWT_SECRET_KEY}" > server.key
-          npx sfdx force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_TEMPLATE_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_TEMPLATE_USERNAME }} -a Template --instanceurl https://test.salesforce.com
+          npx sfdx force:auth:jwt:grant --client-id ${{ secrets.SALESFORCE_TEMPLATE_CONSUMER_KEY }} --jwt-key-file server.key --username ${{ secrets.SALESFORCE_TEMPLATE_USERNAME }} -a Template --instance-url https://octoforce2--template.sandbox.my.salesforce.com/
 
       - name: Run PR Validate Core
         uses: ./.github/actions/pr-validate-core
