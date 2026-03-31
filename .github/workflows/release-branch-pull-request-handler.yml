@@ -15,7 +15,7 @@ on:
         required: true
         type: number
       include_destructive_changes:
-        description: "Include destructive changes in the deployment"
+        description: "Include destructive changes in the deployment (if present)"
         required: false
         type: boolean
         default: false
