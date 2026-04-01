@@ -85,7 +85,7 @@ jobs:
         run: node ./node-scripts/branch-filter.js
       - name: Did Metadata or Auth Files Change
         if: github.event_name != 'workflow_dispatch' && steps.branchFilter.outputs.matches == 'true'
-        uses: rdietrick/did-files-change@12ed863b722bc28052850c22b28a37f38b6eca8d
+        uses: rdietrick/did-files-change@56b6fcc8069eae9c1031a48fe734f0d77ec95b5e
         id: requires-deploy
         with:
           pathspec: force-app auth

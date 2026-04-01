@@ -45,7 +45,7 @@ jobs:
           git config --global --add safe.directory /github/workspace
 
       - name: Did Metadata Change
-        uses: rdietrick/did-files-change@12ed863b722bc28052850c22b28a37f38b6eca8d
+        uses: rdietrick/did-files-change@56b6fcc8069eae9c1031a48fe734f0d77ec95b5e
         id: requires-deploy
         with:
           pathspec: force-app
