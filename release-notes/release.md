@@ -1,3 +1,3 @@
 ### Includes the following items
 
-1. [#17 - delete a field](https://github.com/rdietrick/octoforce-actions/issues/17)
+1. [#19 - Add field "Color"](https://github.com/rdietrick/octoforce-actions/issues/19)
