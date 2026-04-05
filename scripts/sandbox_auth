@@ -5,7 +5,7 @@ GREEN='\033[0;32m'
 BLUE_BOLD='\033[1;94m'
 COLOR_RESET='\033[0m'
 BRANCH_NAME=`git rev-parse --abbrev-ref HEAD`
-noDevAuth=true
+
 if [[ $noDevAuth = true ]]; then
     echo "===> Skipping SFDC dev org authentication."
 else
