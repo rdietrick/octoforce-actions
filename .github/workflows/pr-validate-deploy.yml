@@ -118,7 +118,6 @@ jobs:
           SALESFORCE_JWT_KEY: ${{ secrets.SALESFORCE_JWT_KEY }}
           PROD_INSTANCE_URL: ${{ vars.SALESFORCE_PROD_INSTANCE_URL }}
         run: |
-          #trap 'rm -f server.key' EXIT
           echo "${SALESFORCE_JWT_KEY}" > server.key
           INSTANCE_URL_ARG=""
           if [ -n "$PROD_INSTANCE_URL" ]; then
@@ -133,10 +132,12 @@ jobs:
           SALESFORCE_TEMPLATE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_TEMPLATE_JWT_SECRET_KEY }}
           TEMPLATE_INSTANCE_URL: ${{ vars.SALESFORCE_TEMPLATE_INSTANCE_URL }}
         run: |
-          #trap 'rm -f server.key' EXIT
           echo "${SALESFORCE_TEMPLATE_JWT_SECRET_KEY}" > server.key
           INSTANCE_URL="${TEMPLATE_INSTANCE_URL:-https://test.salesforce.org}"
           npx sfdx force:auth:jwt:grant --client-id ${{ secrets.SALESFORCE_TEMPLATE_CONSUMER_KEY }} --jwt-key-file server.key --username ${{ secrets.SALESFORCE_TEMPLATE_USERNAME }} -a Template --instance-url $INSTANCE_URL
+
+      - Delete server.key
+        run: rm -f server.key
 
       - name: Run PR Validate Core
         uses: ./.github/actions/pr-validate-core
