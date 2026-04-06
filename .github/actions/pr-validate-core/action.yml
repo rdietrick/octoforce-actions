@@ -77,8 +77,12 @@ runs:
         done
 
         if [ "$NEEDS_AGGREGATION" = "true" ]; then
-          echo "Detected decomposed profile/permission set changes; aggregating metadata."
-          npx sfdx profiles:aggregate
+          if [ -d "force-app/main/default/profiles/decomposed" ] || [ -d "force-app/main/default/permissionsets/decomposed" ]; then
+            echo "Detected decomposed profile/permission set changes; aggregating metadata."
+            npx sfdx profiles:aggregate
+          else
+            echo "Decomposed directories not found; skipping aggregation (may have been removed by a prior step)."
+          fi
         fi
 
         for PROFILE_NAME in "${!CHANGED_PROFILE_NAMES[@]}"; do
