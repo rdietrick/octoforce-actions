@@ -124,6 +124,7 @@ jobs:
           if [ -n "$PROD_INSTANCE_URL" ]; then
             INSTANCE_URL_ARG="--instance-url $PROD_INSTANCE_URL"
           fi
+          echo "INSTANCE_URL_ARG=$INSTANCE_URL_ARG"
           npx sfdx force:auth:jwt:grant --client-id ${{ secrets.SALESFORCE_CLIENT_ID }} --jwt-key-file server.key --username ${{ secrets.SALESFORCE_PROD_USERNAME }} -a Production $INSTANCE_URL_ARG
 
       - name: Authenticate Template Org
