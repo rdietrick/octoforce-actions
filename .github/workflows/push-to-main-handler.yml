@@ -60,9 +60,6 @@ jobs:
             echo "IS_RELEASE=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: debug sf plugin
-        run: npx sf --version
-
       - name: Install profile decompose sf plugin # ERROR: Unable to convert this command; you must convert it manually.
 
         if: steps.requires-deploy.outputs.changed == '1'
