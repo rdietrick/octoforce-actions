@@ -22,24 +22,6 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.SCOPED_PAT }}
 
-      - name: Setup Node
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: ".nvmrc"
-
-      - name: Cache Node Modules
-        uses: actions/cache@v5
-        id: npm_cache_id
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-npm-cache-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-cache-
-            ${{ runner.os }}-
-
-      - name: Install Dependencies
-        if: steps.npm_cache_id.outputs.cache-hit != 'true'
-        run: npm ci
       - name: Authorize external workspace
         run: |
           git config --global --add safe.directory /github/workspace
@@ -59,6 +41,31 @@ jobs:
           else
             echo "IS_RELEASE=true" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Setup Node
+        if: steps.requires-deploy.outputs.changed == '1'
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Cache Node Modules
+        if: steps.requires-deploy.outputs.changed == '1'
+        uses: actions/cache@v5
+        id: npm_cache_id
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-npm-cache-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-cache-
+            ${{ runner.os }}-
+
+      - name: Install Dependencies
+        if: steps.requires-deploy.outputs.changed == '1' && steps.npm_cache_id.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: debug sf plugin
+        if: steps.requires-deploy.outputs.changed == '1'
+        run: npx sf --version
 
       - name: Install profile decompose sf plugin # ERROR: Unable to convert this command; you must convert it manually.
 
