@@ -25,6 +25,11 @@ on:
           - NoTestRun
           - RunSpecifiedTests
           - RunAllTestsInOrg
+      include-destructive-changes:
+        description: Include destructive changes in the validation deployment (if present)
+        required: false
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -139,6 +144,21 @@ jobs:
       - name: Delete server.key
         run: rm -f server.key
 
+      - name: Generate Destructive Changes Param
+        if: inputs['include-destructive-changes']
+        id: check_for_destructive_changes
+        run: |
+          if [ -f destructive-changes/destructiveChangesPre.xml ] && [ -f destructive-changes/destructiveChangesPost.xml ]
+          then 
+            echo "DESTRUCTIVE_FILES=--pre-destructive-changes destructive-changes/destructiveChangesPre.xml --post-destructive-changes destructive-changes/destructiveChangesPost.xml" >> "$GITHUB_OUTPUT";
+          elif [ -f destructive-changes/destructiveChangesPre.xml ]
+          then 
+            echo "DESTRUCTIVE_FILES=--pre-destructive-changes destructive-changes/destructiveChangesPre.xml" >> "$GITHUB_OUTPUT";
+          elif [ -f destructive-changes/destructiveChangesPost.xml ]
+          then 
+            echo "DESTRUCTIVE_FILES=--post-destructive-changes destructive-changes/destructiveChangesPost.xml" >> "$GITHUB_OUTPUT";
+          fi
+
       - name: Run PR Validate Core
         uses: ./.github/actions/pr-validate-core
         with:
@@ -147,5 +167,6 @@ jobs:
           github-token: ${{ secrets.SCOPED_PAT }}
           post-pr-comment: true
           apply-validation-label: true
+          destructive-changes-args: ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }}
         env:
           TARGET_ORG_ALIAS: ${{ inputs['target-org'] }}
