@@ -126,13 +126,29 @@ runs:
 
         echo "has_metadata_changes=true" >> "$GITHUB_OUTPUT"
 
+    - name: Generate Destructive Changes Param
+      id: check_for_destructive_changes
+      if: steps.delta_manifest.outputs.has_metadata_changes == 'true'
+      shell: bash
+      run: |
+        if [ -f destructive-changes/destructiveChangesPre.xml ] && [ -f destructive-changes/destructiveChangesPost.xml ]
+        then 
+          echo "DESTRUCTIVE_FILES=--pre-destructive-changes destructive-changes/destructiveChangesPre.xml --post-destructive-changes destructive-changes/destructiveChangesPost.xml" >> "$GITHUB_OUTPUT";
+        elif [ -f destructive-changes/destructiveChangesPre.xml ]
+        then 
+          echo "DESTRUCTIVE_FILES=--pre-destructive-changes destructive-changes/destructiveChangesPre.xml" >> "$GITHUB_OUTPUT";
+        elif [ -f destructive-changes/destructiveChangesPost.xml ]
+        then 
+          echo "DESTRUCTIVE_FILES=--post-destructive-changes destructive-changes/destructiveChangesPost.xml" >> "$GITHUB_OUTPUT";
+        fi
+
     - name: Validate Deployment
       if: steps.delta_manifest.outputs.has_metadata_changes == 'true'
       shell: bash
       env:
         TARGET_ORG_ALIAS: ${{ env.TARGET_ORG_ALIAS }}
         TEST_LEVEL: ${{ inputs.run-tests-level }}
-      run: npx sf project deploy start --dry-run -x temp-deploy-manifest.xml -o "$TARGET_ORG_ALIAS" -w 200 -l "$TEST_LEVEL"
+      run: npx sf project deploy start --dry-run -x temp-deploy-manifest.xml -o "$TARGET_ORG_ALIAS" -w 200 -l "$TEST_LEVEL" ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }}
 
     - name: Comment on Pull Request
       if: inputs.post-pr-comment == 'true'
