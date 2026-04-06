@@ -22,24 +22,6 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.SCOPED_PAT }}
 
-      - name: Setup Node
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: ".nvmrc"
-
-      - name: Cache Node Modules
-        uses: actions/cache@v5
-        id: npm_cache_id
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-npm-cache-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-cache-
-            ${{ runner.os }}-
-
-      - name: Install Dependencies
-        if: steps.npm_cache_id.outputs.cache-hit != 'true'
-        run: npm ci
       - name: Authorize external workspace
         run: |
           git config --global --add safe.directory /github/workspace
@@ -60,7 +42,29 @@ jobs:
             echo "IS_RELEASE=true" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Setup Node
+        if: steps.requires-deploy.outputs.changed == '1'
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Cache Node Modules
+        if: steps.requires-deploy.outputs.changed == '1'
+        uses: actions/cache@v5
+        id: npm_cache_id
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-npm-cache-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-cache-
+            ${{ runner.os }}-
+
+      - name: Install Dependencies
+        if: steps.requires-deploy.outputs.changed == '1' && steps.npm_cache_id.outputs.cache-hit != 'true'
+        run: npm ci
+
       - name: debug sf plugin
+        if: steps.requires-deploy.outputs.changed == '1'
         run: npx sf --version
 
       - name: Install profile decompose sf plugin # ERROR: Unable to convert this command; you must convert it manually.
@@ -72,9 +76,14 @@ jobs:
         if: steps.requires-deploy.outputs.changed == '1'
         env:
           SALESFORCE_JWT_KEY: ${{ secrets.SALESFORCE_JWT_KEY }}
+          PROD_INSTANCE_URL: ${{ vars.SALESFORCE_PROD_INSTANCE_URL }}
         run: |
           echo "${SALESFORCE_JWT_KEY}" > server.key
-          npx sf auth jwt grant  --client-id ${{ secrets.SALESFORCE_CLIENT_ID }} --jwt-key-file server.key --username ${{ secrets.SALESFORCE_PROD_USERNAME}} -a Production
+          INSTANCE_URL_ARG=""
+          if [ -n "$PROD_INSTANCE_URL" ]; then
+            INSTANCE_URL_ARG="--instance-url $PROD_INSTANCE_URL"
+          fi
+          npx sf auth jwt grant  --client-id ${{ secrets.SALESFORCE_CLIENT_ID }} --jwt-key-file server.key --username ${{ secrets.SALESFORCE_PROD_USERNAME}} -a Production $INSTANCE_URL_ARG
 
       - name: Recompose profiles
         if: steps.requires-deploy.outputs.changed == '1' && vars.SALESFORCE_FORMATTED_PROFILES_AND_PERMS == 'false'
@@ -144,9 +153,11 @@ jobs:
         if: steps.requires-deploy.outputs.changed == '1'
         run: |
           echo "${SALESFORCE_TEMPLATE_JWT_SECRET_KEY}" > template-server.key
-          npx sf org login jwt --client-id ${{ secrets.SALESFORCE_TEMPLATE_CONSUMER_KEY }} --jwt-key-file template-server.key --username ${{ secrets.SALESFORCE_TEMPLATE_USERNAME}} --alias Template --instance-url https://test.salesforce.com
+          INSTANCE_URL="${TEMPLATE_INSTANCE_URL:-https://test.salesforce.org}"
+          npx sf org login jwt --client-id ${{ secrets.SALESFORCE_TEMPLATE_CONSUMER_KEY }} --jwt-key-file template-server.key --username ${{ secrets.SALESFORCE_TEMPLATE_USERNAME}} --alias Template --instance-url $INSTANCE_URL
         env:
           SALESFORCE_TEMPLATE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_TEMPLATE_JWT_SECRET_KEY }}
+          TEMPLATE_INSTANCE_URL: ${{ vars.SALESFORCE_TEMPLATE_INSTANCE_URL }}
 
       - name: Update Template sandbox
         if: steps.requires-deploy.outputs.changed == '1'

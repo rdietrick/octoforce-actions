@@ -126,13 +126,20 @@ jobs:
         run: |
           sudo apt install age
           echo "$SFDX_AUTH_SECRET_KEY" >> key.txt
-          echo "age file checksum below"
-          cksum ${LOGIN_ENC_FILE}.age
           age --decrypt -i key.txt ${LOGIN_ENC_FILE}.age > ${LOGIN_ENC_FILE}
-          echo "Decrypted login URL:"
-          cat ${LOGIN_ENC_FILE}
           rm key.txt
           npx sf org login sfdx-url -f ${LOGIN_ENC_FILE} -a is${{ steps.branchFilter.outputs.issueNumber }}uat
+      - name: Validate PR Deployment
+        if: steps.branchFilter.outputs.matches == 'true' && (github.event_name == 'workflow_dispatch' || steps.requires-deploy.outputs.changed == '1')
+        uses: ./.github/actions/pr-validate-core
+        with:
+          pr-number: ${{ github.event_name == 'workflow_dispatch' && inputs.pull_request_number || github.event.pull_request.number }}
+          run-tests-level: NoTestRun
+          github-token: ${{ secrets.SCOPED_PAT }}
+          post-pr-comment: false
+          apply-validation-label: false
+        env:
+          TARGET_ORG_ALIAS: is${{ steps.branchFilter.outputs.issueNumber }}uat
       - name: Deploy Source to Sandbox
         if: steps.branchFilter.outputs.matches == 'true' && (github.event_name == 'workflow_dispatch' || steps.requires-deploy.outputs.changed == '1')
         env:

@@ -25,9 +25,9 @@
                 <label>Yellow</label>
             </value>
             <value>
-                <fullName>Green</fullName>
+                <fullName>Black</fullName>
                 <default>false</default>
-                <label>Green</label>
+                <label>Black</label>
             </value>
         </valueSetDefinition>
     </valueSet>
