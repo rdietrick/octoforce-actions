@@ -138,6 +138,7 @@ jobs:
           github-token: ${{ secrets.SCOPED_PAT }}
           post-pr-comment: false
           apply-validation-label: false
+          destructive-changes-args: ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }}
         env:
           TARGET_ORG_ALIAS: is${{ steps.branchFilter.outputs.issueNumber }}uat
       - name: Deploy Source to Sandbox

@@ -20,6 +20,10 @@ inputs:
     description: Whether to apply the prod-deploy-validated label
     required: false
     default: "true"
+  destructive-changes-args:
+    description: Destructive changes arguments to pass to the deploy command (e.g., --pre-destructive-changes ... --post-destructive-changes ...)
+    required: false
+    default: ""
 
 outputs:
   has-metadata-changes:
@@ -77,8 +81,12 @@ runs:
         done
 
         if [ "$NEEDS_AGGREGATION" = "true" ]; then
-          echo "Detected decomposed profile/permission set changes; aggregating metadata."
-          npx sfdx profiles:aggregate
+          if [ -d "force-app/main/default/profiles/decomposed" ] || [ -d "force-app/main/default/permissionsets/decomposed" ]; then
+            echo "Detected decomposed profile/permission set changes; aggregating metadata."
+            npx sfdx profiles:aggregate
+          else
+            echo "Decomposed directories not found; skipping aggregation (may have been removed by a prior step)."
+          fi
         fi
 
         for PROFILE_NAME in "${!CHANGED_PROFILE_NAMES[@]}"; do
@@ -128,7 +136,7 @@ runs:
       env:
         TARGET_ORG_ALIAS: ${{ env.TARGET_ORG_ALIAS }}
         TEST_LEVEL: ${{ inputs.run-tests-level }}
-      run: npx sf project deploy start --dry-run -x temp-deploy-manifest.xml -o "$TARGET_ORG_ALIAS" -w 200 -l "$TEST_LEVEL"
+      run: npx sf project deploy start --dry-run -x temp-deploy-manifest.xml -o "$TARGET_ORG_ALIAS" -w 200 -l "$TEST_LEVEL" ${{ inputs.destructive-changes-args }}
 
     - name: Comment on Pull Request
       if: inputs.post-pr-comment == 'true'
