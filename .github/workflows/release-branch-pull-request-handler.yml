@@ -91,7 +91,7 @@ jobs:
           pathspec: force-app auth
           sha: ${{ github.event.pull_request.head.sha }}
       - name: Recompose Profiles
-        if: steps.branchFilter.outputs.matches == 'true' && (github.event_name == 'workflow_dispatch' || steps.requires-deploy.outputs.changed == '1') && vars.SALESFORCE_FORMATTED_PROFILES_AND_PERMS == 'false'
+        if: steps.branchFilter.outputs.matches == 'true' && (github.event_name == 'workflow_dispatch' || steps.requires-deploy.outputs.changed == '1') && vars.DECOMPOSED_PROFILES_AND_PERMS == 'true'
         run: |
           echo y | npx sf plugins:install @rdietrick/sfdx-profile-decompose
           npx sf profiles:aggregate

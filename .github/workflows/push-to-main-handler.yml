@@ -87,7 +87,7 @@ jobs:
           npx sf auth jwt grant  --client-id ${{ secrets.SALESFORCE_CLIENT_ID }} --jwt-key-file server.key --username ${{ secrets.SALESFORCE_PROD_USERNAME}} -a Production $INSTANCE_URL_ARG
 
       - name: Recompose profiles
-        if: steps.requires-deploy.outputs.changed == '1' && vars.SALESFORCE_FORMATTED_PROFILES_AND_PERMS == 'false'
+        if: steps.requires-deploy.outputs.changed == '1' && vars.DECOMPOSED_PROFILES_AND_PERMS == 'true'
         run: |
           npx sf profiles:aggregate
           rm -rf force-app/main/default/profiles/decomposed force-app/main/default/permissionsets/decomposed
