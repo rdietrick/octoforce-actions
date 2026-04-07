@@ -1,7 +1,7 @@
 <Profile>
     <fieldPermissions>
-        <editable>false</editable>
-        <field>TestObject__c.Color__c</field>
+        <editable>true</editable>
+        <field>TestObject__c.Size_del__c</field>
         <readable>true</readable>
     </fieldPermissions>
 </Profile>
