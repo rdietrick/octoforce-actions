@@ -1,6 +1,7 @@
 permissions:
   contents: write
   pull-requests: write
+  issues: write
   packages: read
   id-token: write
   actions: read
@@ -168,14 +169,13 @@ jobs:
       - name: Create PR with cleaned up destructive changes
         if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
         env:
-          PAT: ${{ secrets.SCOPED_PAT }}
+          GH_TOKEN: ${{ secrets.SCOPED_PAT }}
           USER_EMAIL: ${{ secrets.BOT_USER_EMAIL }}
           USER_NAME: ${{ secrets.BOT_USER_NAME }}
         run: |
           if [ -f destructive-changes/destructiveChanges.xml ] || [ -f destructive-changes/destructiveChangesPre.xml ] || [ -f destructive-changes/destructiveChangesPost.xml ]
           then 
             RELEASE_DATE=$(date +'%Y-%m-%d')
-            echo $PAT | gh auth login --with-token
             git config --global user.email "$USER_EMAIL"
             git config --global user.name "$USER_NAME"
 
