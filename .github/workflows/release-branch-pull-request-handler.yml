@@ -90,6 +90,15 @@ jobs:
         with:
           pathspec: force-app auth
           sha: ${{ github.event.pull_request.head.sha }}
+      - name: Debug Recompose Conditions
+        if: steps.branchFilter.outputs.matches == 'true'
+        run: |
+          echo "Branch Name: ${{ github.event_name == 'workflow_dispatch' && steps.resolve_pr.outputs.branch || github.head_ref }}"
+          echo "Matches Release Branch Prefix (${RELEASE_BRANCH_PREFIX}): ${{ steps.branchFilter.outputs.matches }}"
+          echo "Event Name: ${GITHUB_EVENT_NAME}"
+          echo "Requires Deploy: ${{ steps.requires-deploy.outputs.changed }}"
+          echo "Generate Release: ${GENERATE_RELEASE}"
+          echo "Decomposed Profiles and Perms: ${DECOMPOSED_PROFILES_AND_PERMS}"
       - name: Recompose Profiles
         if: steps.branchFilter.outputs.matches == 'true' && (github.event_name == 'workflow_dispatch' || steps.requires-deploy.outputs.changed == '1') && vars.DECOMPOSED_PROFILES_AND_PERMS == 'true'
         run: |
