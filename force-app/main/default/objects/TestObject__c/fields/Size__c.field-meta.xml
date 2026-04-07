@@ -24,6 +24,11 @@
                 <default>false</default>
                 <label>Large</label>
             </value>
+            <value>
+                <fullName>Extra Large</fullName>
+                <default>false</default>
+                <label>Extra Large</label>
+            </value>
         </valueSetDefinition>
     </valueSet>
 </CustomField>
