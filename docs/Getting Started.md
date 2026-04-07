@@ -14,7 +14,7 @@ The workflows in this repo execute only on branches whose names match certain us
 
 #### Profile and permissionset format
 
-If enabled in this project, an [sfdx plugin](https://www.npmjs.com/package/@rdietrick/sfdx-profile-decompose) can translate monolithic Salesforce profiles and permissionsets into more granular XML files in your project. We've found that this makes managing diffs and conflict resolution in these files much easier. When the plugin is enabled, each profile will, for instance, be broken down into separate files for each object that the profile maintains FLS for. To turn it on, set the repository variable `SALESFORCE_FORMATTED_PROFILES_AND_PERMS` to true and add the following two entries to your `.gitignore` file:
+If enabled in this project, an [sfdx plugin](https://www.npmjs.com/package/@rdietrick/sfdx-profile-decompose) can translate monolithic Salesforce profiles and permissionsets into more granular XML files in your project. We've found that this makes managing diffs and conflict resolution in these files much easier. When the plugin is enabled, each profile will, for instance, be broken down into separate files for each object that the profile maintains FLS for. To turn it on, set the repository variable `DECOMPOSED_PROFILES_AND_PERMS` to true and add the following two entries to your `.gitignore` file:
 
 ```
 force-app/main/default/profiles/*-meta.xml
@@ -115,8 +115,8 @@ The following repository variables are required to be set in the repository sett
   - This is the prefix used for the release branch. This is used to identify branches where pull requests should be deployed to test sandbox.
 - `GENERATE_RELEASE`
   - This is a boolean feature flag that determines whether release notes should be generated.
-- `SALESFORCE_FORMATTED_PROFILES_AND_PERMS`
-  - This is a feature flag that is a boolean value that determines whether profiles and permissions should be formatted using the `profile:decompose` plugin.
+- `DECOMPOSED_PROFILES_AND_PERMS`
+  - When set to `true`, profiles and permission sets are stored in decomposed format using the `profile:decompose` plugin, and will be aggregated before deployment.
 - `DEPLOYMENT_TIMEOUT`
   - The number of minutes to wait for the `force:source:deploy` command to complete and display results.
 - `SALESFORCE_PROD_INSTANCE_URL`
