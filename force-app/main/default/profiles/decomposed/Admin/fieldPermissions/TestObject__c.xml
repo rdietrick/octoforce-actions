@@ -1,7 +1,7 @@
 <Profile>
     <fieldPermissions>
         <editable>true</editable>
-        <field>TestObject__c.Size_del__c</field>
+        <field>TestObject__c.Size__c</field>
         <readable>true</readable>
     </fieldPermissions>
 </Profile>
