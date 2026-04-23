@@ -1,4 +1,4 @@
 ### Includes the following items
 
-1. [#27 - Add Color White](https://github.com/rdietrick/octoforce-actions/issues/27)
-1. [#29 - add unit test](https://github.com/rdietrick/octoforce-actions/issues/29)
+1. [#33 - add size field](https://github.com/rdietrick/octoforce-actions/issues/33)
+1. [#36 - delete a field](https://github.com/rdietrick/octoforce-actions/issues/36)
