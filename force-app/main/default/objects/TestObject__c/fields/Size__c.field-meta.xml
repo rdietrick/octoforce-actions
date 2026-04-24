@@ -10,6 +10,11 @@
         <valueSetDefinition>
             <sorted>false</sorted>
             <value>
+                <fullName>Extra Small</fullName>
+                <default>false</default>
+                <label>Extra Small</label>
+            </value>
+            <value>
                 <fullName>Small</fullName>
                 <default>false</default>
                 <label>Small</label>
