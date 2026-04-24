@@ -68,8 +68,7 @@ jobs:
         if: steps.requires-deploy.outputs.changed == '1'
         run: npx sf --version
 
-      - name: Install profile decompose sf plugin # ERROR: Unable to convert this command; you must convert it manually.
-
+      - name: Install profile decompose sf plugin
         if: steps.requires-deploy.outputs.changed == '1'
         run: echo y | npx sf plugins install @rdietrick/sfdx-profile-decompose
 
