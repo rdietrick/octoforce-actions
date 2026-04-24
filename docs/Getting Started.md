@@ -119,6 +119,8 @@ The following repository variables are required to be set in the repository sett
   - When set to `true`, profiles and permission sets are stored in decomposed format using the `profile:decompose` plugin, and will be aggregated before deployment.
 - `DEPLOYMENT_TIMEOUT`
   - The number of minutes to wait for the `force:source:deploy` command to complete and display results.
+- `PR_VALIDATION_DEPLOY_DISABLED`
+  - If set to `true`, the validation deployment step is skipped during PR deployments.
 - `SALESFORCE_PROD_INSTANCE_URL`
   - The instance URL for the production Salesforce org (e.g., `https://mycompany.my.salesforce.com`). Used when authenticating for production deployments. If not set, the `--instance-url` parameter is omitted from the auth command (defaulting to https://login.salesforce.com).
 - `SALESFORCE_TEMPLATE_INSTANCE_URL`
