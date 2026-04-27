@@ -64,10 +64,6 @@ jobs:
         if: steps.requires-deploy.outputs.changed == '1' && steps.npm_cache_id.outputs.cache-hit != 'true'
         run: npm ci
 
-      - name: debug sf plugin
-        if: steps.requires-deploy.outputs.changed == '1'
-        run: npx sf --version
-
       - name: Install profile decompose sf plugin
         if: steps.requires-deploy.outputs.changed == '1'
         run: echo y | npx sf plugins install @rdietrick/sfdx-profile-decompose
