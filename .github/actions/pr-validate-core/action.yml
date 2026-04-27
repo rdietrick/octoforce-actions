@@ -124,7 +124,7 @@ runs:
         done
 
         npx sf project generate manifest \
-          --api-version 64.0 \
+          --api-version 66.0 \
           -n temp-deploy-manifest \
           "${MANIFEST_SOURCE_DIR_ARGS[@]}"
 
