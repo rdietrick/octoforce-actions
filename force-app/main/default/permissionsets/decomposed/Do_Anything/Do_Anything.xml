@@ -1,5 +1,0 @@
-<PermissionSet>
-    <hasActivationRequired>false</hasActivationRequired>
-    <label>Do Anything</label>
-    <license>Salesforce</license>
-</PermissionSet>
