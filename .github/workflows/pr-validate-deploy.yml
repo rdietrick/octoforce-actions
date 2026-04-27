@@ -23,7 +23,6 @@ on:
         options:
           - RunLocalTests
           - NoTestRun
-          - RunSpecifiedTests
           - RunAllTestsInOrg
       include-destructive-changes:
         description: Include destructive changes in the validation deployment (if present)
